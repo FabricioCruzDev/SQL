@@ -41,7 +41,7 @@ SELECT COUNT(DISTINCT cpf_cnpj_fornecedor) AS CONTAGEM_FORNECEDORES,
 FROM `basedosdados.br_tse_eleicoes.despesas_candidato`
 WHERE cpf_candidato = '23790997587' AND ano = 2018 AND sigla_uf = 'BA'
 
-  -- GROUP BY HAVING CASE
+-- GROUP BY HAVING CASE
 SELECT nome_candidato, COUNT(DISTINCT cpf_cnpj_doador) AS qtd_doadores,
 ROUND(SUM(valor_receita), 2) AS Receita_Total
 FROM `basedosdados.br_tse_eleicoes.receitas_candidato`
@@ -66,10 +66,37 @@ ORDER BY Receita_Total DESC;
 --Soma valor total de despesas dos candidatos, por candidato a governador-BA
 
 -- resolvendo o desafio
-SELECT DISTINCT nome_candidato, COUNT(DISTINCT cpf_cnpj_fornecedor),
+SELECT DISTINCT nome_candidato, COUNT(DISTINCT cpf_cnpj_fornecedor) AS quantidade_fornecedores,
         ROUND(SUM(valor_despesa), 2) AS total_despesas,
         CASE WHEN SUM(valor_despesa) > 100000 THEN 'alto' ELSE 'baixo' END AS Consumo
         FROM `basedosdados.br_tse_eleicoes.despesas_candidato`
         WHERE ano = 2018 AND cargo = 'governador' AND sigla_uf = 'BA'
         GROUP BY nome_candidato
-        ORDER BY total_despesas;
+        ORDER BY total_despesas DESC;
+
+
+-- JOIN - JUNÇÃO DE TABELAS
+
+-- JOIN = INNER JOIN - MESMO RESULTADO
+/* SELECT <lista_atributos>
+FROM tabela A JOIN tabela B
+  ON A.key = B.key*/
+
+-- LEFT(RIGHT) OUTER JOIN - INTERSEÇÃO + RESULTADOS DA TABELA QUE NÃO ESTÃO NA TABELA B E VICE-VERSA
+/* SELECT <lista_atributos>
+FROM tabela A LEFT(RIGHT) OUTER JOIN tabela B
+  ON A.key = B.key*/
+
+-- FULL OUTER JOIN - UNIÃO ENTRE AS TABELAS
+/* SELECT <lista_atributos>
+FROM tabela A FULL OUTER JOIN tabela B
+  ON A.key = B.key*/
+
+SELECT bens.id_candidato_bd,
+  cands.cpf, 
+  cands.nome,
+  SUM(valor_item) AS bens_total
+FROM `basedosdados.br_tse_eleicoes.bens_candidato` AS bens JOIN `basedosdados.br_tse_eleicoes.candidatos` AS cands ON bens.id_candidato_bd = cands.id_candidato_bd
+WHERE bens.ano = 2018 AND bens.sigla_uf = "BA" AND cands.ano = 2018 AND cands.cargo = "governador"
+GROUP BY bens.id_candidato_bd, cands.cpf, cands.nome
+ORDER BY bens_total DESC
